@@ -1,6 +1,3 @@
-// First-OpenGlL.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
 #include <glad.h>
 #include <GLFW/glfw3.h>
@@ -18,6 +15,12 @@ float vertices[]{
     0,      0.5f    ,0
 };
 
+float BackgroundVerts[]{
+    -1,-1,0,
+    -1,1,0,
+    1,1,0,
+    1,-1,0
+};
 
 
 int main()
@@ -49,7 +52,8 @@ int main()
     
 
     //init Shader 
-    GLuint ShaderProg = glCreateProgram();
+    GLuint TriShaderProg = glCreateProgram();
+    GLuint QuadShaderProg = glCreateProgram();
 
     //source code for vertex shader 
     const char* vertexShaderSource = "#version 330 core\n"
@@ -60,11 +64,18 @@ int main()
         "}\0";
 
     //source code for frag shader
-    const char* fragmentShaderSource = "#version 330 core\n"
+    const char* TrifragmentShaderSource = "#version 330 core\n"
         "out vec4 FragColor;\n"
         "void main()\n"
         "{\n"
         "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+        "}\0";
+
+    const char* QuadFragShaderSource = "#version 330 core\n"
+        "out vec4 FragColor;\n"
+        "void main()\n"
+        "{\n"
+        "FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n"
         "}\0";
 
     //There is probably a way to run straight up glsl however i do not know how to do that yet
@@ -79,20 +90,30 @@ int main()
 
 
     //Repeat for Fragment shader 
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    GLuint TrifragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(TrifragmentShader, 1, &TrifragmentShaderSource, NULL);
 
-    glCompileShader(fragmentShader);
+    glCompileShader(TrifragmentShader);
+
+    GLuint QuadFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(QuadFragmentShader, 1, &QuadFragShaderSource, NULL);
+
+    glCompileShader(QuadFragmentShader);
 
 
     //Attach each shader to the defined program and link them together
-    glAttachShader(ShaderProg, vertexShader);
-    glAttachShader(ShaderProg, fragmentShader);
-    glLinkProgram(ShaderProg);
+    glAttachShader(TriShaderProg, vertexShader);
+    glAttachShader(TriShaderProg, TrifragmentShader);
+    glLinkProgram(TriShaderProg);
+
+    glAttachShader(QuadShaderProg, vertexShader);
+    glAttachShader(QuadShaderProg, QuadFragmentShader);
+    glLinkProgram(QuadShaderProg);
     
     
     glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    glDeleteShader(TrifragmentShader);
+    glDeleteShader(QuadFragmentShader);
 
 
     //Vertex Attribute Object 
@@ -107,9 +128,13 @@ int main()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    //glBufferData(GL_ARRAY_BUFFER, sizeof(BackgroundVerts),BackgroundVerts,GL_STATIC_DRAW);
+
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
 
 
-    
+
     
     while (!glfwWindowShouldClose(window))
     {
@@ -122,8 +147,10 @@ int main()
 
         
         
-        glUseProgram(ShaderProg);
+        glUseProgram(QuadShaderProg);
         glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 1, 4);
+        glUseProgram(TriShaderProg);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
     }
