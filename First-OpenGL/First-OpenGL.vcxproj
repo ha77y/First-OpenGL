@@ -26,6 +26,9 @@
     <ClInclude Include="..\..\..\..\..\..\..\Glad\include\glad\glad.h" />
     <ClInclude Include="..\..\..\..\..\..\..\Glad\include\KHR\khrplatform.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="BasicShader.glsl" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
