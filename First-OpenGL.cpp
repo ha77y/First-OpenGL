@@ -2,6 +2,8 @@
 #include <glad.h>
 #include <GLFW/glfw3.h>
 
+
+
 const int windowWidth = 800;
 const int windowHeight = 600;
 
@@ -47,8 +49,11 @@ int main()
 
 
     //Vertex Buffer Object
-    unsigned int vbo;
-    glGenBuffers(1, &vbo);
+    unsigned int vbo1;
+    glGenBuffers(1, &vbo1);
+    unsigned int vbo2;
+    glGenBuffers(1, &vbo2);
+
     
 
     //init Shader 
@@ -68,14 +73,14 @@ int main()
         "out vec4 FragColor;\n"
         "void main()\n"
         "{\n"
-        "FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+        "FragColor = vec4(1.0f, 0.2f, 1.0f, 1.0f);\n"
         "}\0";
 
     const char* QuadFragShaderSource = "#version 330 core\n"
         "out vec4 FragColor;\n"
         "void main()\n"
         "{\n"
-        "FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n"
+        "FragColor = vec4(0.0f, 0.65f, 1.0f, 1.0f);\n"
         "}\0";
 
     //There is probably a way to run straight up glsl however i do not know how to do that yet
@@ -89,7 +94,7 @@ int main()
     glCompileShader(vertexShader);                              //compile 
 
 
-    //Repeat for Fragment shader 
+    //Repeat for Fragment shaders 
     GLuint TrifragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(TrifragmentShader, 1, &TrifragmentShaderSource, NULL);
 
@@ -117,21 +122,30 @@ int main()
 
 
     //Vertex Attribute Object 
-    GLuint VAO;
-    glGenVertexArrays(1, &VAO);
+    GLuint VAO1;
+    glGenVertexArrays(1, &VAO1);
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(VAO1);
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo1);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices , GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+
+    GLuint VAO2;
+    glGenVertexArrays(1, &VAO2);
+
+    glBindVertexArray(VAO2);
+
+    glBindBuffer(GL_ARRAY_BUFFER,vbo2);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(BackgroundVerts), BackgroundVerts, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     //glBufferData(GL_ARRAY_BUFFER, sizeof(BackgroundVerts),BackgroundVerts,GL_STATIC_DRAW);
-
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
 
 
 
@@ -143,15 +157,21 @@ int main()
         glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
         glfwSwapBuffers(window);
         glfwPollEvents();
-        
 
-        
+        //Render quad
         
         glUseProgram(QuadShaderProg);
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 1, 4);
+        glBindVertexArray(VAO2);
+
+        glDrawArrays(GL_QUADS, 0, 4);
+        
+        
+        //render tri
         glUseProgram(TriShaderProg);
+        glBindVertexArray(VAO1);
+
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        
 
     }
 
