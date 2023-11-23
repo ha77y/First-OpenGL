@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\..\..\Glad\src\glad.c" />
     <ClCompile Include="..\First-OpenGL.cpp" />
+    <ClCompile Include="String append.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\..\..\Glad\include\glad\glad.h" />

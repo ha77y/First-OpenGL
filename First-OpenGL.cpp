@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -6,22 +7,88 @@
 
 using namespace std;
 
+class vec3
+{
+private:
+    float x;
+    float y;
+    float z;
+public:
+    vec3(float _x,float _y,float _z)
+    {
+        x = _x;
+        y = _y;
+        z = _z;
+    }
+    vec3() { x = NULL; y = NULL; z = NULL;}
+    float getX()
+    {
+        return x;
+    }
+    float getY()
+    {
+        return y;
+    }
+    float getZ()
+    {
+        return z;
+    }
+    void setX(float n)
+    {
+        std::cout << " SET X to " << n << endl;
+        x = n;
+    }
+    void setY(float n)
+    {
+        std::cout << " SET Y to " << n << endl;
+        y = n;
+    }
+    void setZ(float n)
+    {
+        std::cout << "SET Z to " << n << endl;
+        z = n;
+    }
+};
+
+class vec2
+{
+private:
+    float x;
+    float y;
+public:
+    float getX()
+    {
+        return x;
+    }
+    float getY()
+    {
+        return y;
+    }
+    void setX(float n)
+    {
+        x = n;
+    }
+    void setY(float n)
+    {
+        y = n;
+    }
+};
 
 class object
 {
 public:
-	float* vertexArray;
-    float* indexArray;
-    float* textureArray;
-    float* normalArray;
+	vec3* vertexArray;
+    vec3* indexArray;
+    vec2* textureArray;
+    vec3* normalArray;
 
     object(int nNum, int tNum, int vNum, int iNum)
     {
         // Allocating memory for each attribute in the object 
-        vertexArray = (float*)malloc(sizeof(float) * vNum *3);
-        indexArray = (float*)malloc(sizeof(float) * iNum * 3);
-        textureArray = (float*)malloc(sizeof(float) * tNum * 2);
-        normalArray = (float*)malloc(sizeof(float) * nNum * 9);
+        vertexArray = (vec3*)malloc(sizeof(vec3) * vNum );
+        indexArray = (vec3*)malloc(sizeof(vec3) * iNum );
+        textureArray = (vec2*)malloc(sizeof(vec2) * tNum );
+        normalArray = (vec3*)malloc(sizeof(vec3) * nNum * 3);
     
         /*
         vertexArray = new float[vNum];
@@ -50,38 +117,42 @@ public:
 
 };
 
+
+
 //Asset Importer .obj
 
 object* import_obj(const string& file_location ) {
 
 	ifstream f(file_location);
     string line;
+    string title;
 	if(!f.good())
 	{
-        cout << "FileStream Error : cannot read file " <<endl;
+        std::cout << "FileStream Error : cannot read file " <<endl;
         return new object();
 	}
+    f >> title;
 
      int normalCount = 0 , uvCount =0 , vertexCount =0, indexCount =0;
 
     while (getline(f,line))
     {
-        if(line.substr(0,2) == "vn")
+        if (title == "vn")
         {
 	        //add to normal attribute at position normalCount
             normalCount++;
         }
-        else if (line.substr(0,2) == "vt")
+        else if (title == "vt")
         {
 	        //add to uv attribute at position uvCount
             uvCount++;
         }
-        else if(line.substr(0,1) == "v")
+        else if (title == "v")
         {
 	        //add to vector attribute at position vectorCount
             vertexCount++;
         }
-        else if(line.substr(0,1) == "f")
+        else if (title == "f")
         {
 	        //add to index array at position faceCount
             indexCount++;
@@ -92,81 +163,92 @@ object* import_obj(const string& file_location ) {
 	auto* myObject = new object(normalCount,uvCount,vertexCount, indexCount);
 
     //Reset file to starting position
-    f.close();
     f.clear();
-    ifstream f2(file_location);
-  
-    
-    string newline;
+    f.seekg(0);
     normalCount = 0; uvCount = 0; vertexCount = 0; indexCount = 0;
 
 
-    //todo Write data from file to arrays
-
-    string title;
-    float a = 0, b = 0, c = 0;
-
-    //while(getline(f,line)
-    while(getline(f2,newline))
-    {
-        cout << newline;
-        f2 >> title >> a >> b >> c;
-        cout << title << " " << a << " " << b << " " << c << endl;
-        if (title == "vn")
+    string a, b, c;
+    vec3 newNormal;
+    
+    while (getline(f, line)){
+        title = line.substr(0, 2);
+        if( title!= "v " && title != "vt" && title != "vn" && title !="f " )
         {
-        	myObject->normalArray[normalCount*3 ] = a;
-        	myObject->normalArray[normalCount*3 + 1] = b;
-        	myObject->normalArray[normalCount*3 + 2] = c;
-            
-            normalCount++;
+            std::cout << "whoops" << endl;
         }
-        else if (title == "vt")
-        {
-			myObject->textureArray[uvCount * 2 ] =a;
-			myObject->textureArray[uvCount * 2 +1] =b;
-			
-            
-            uvCount++;
-        }
-        else if (title == "v")
-        {
-            
-        	myObject->vertexArray[vertexCount * 3 ]=a;
-        	myObject->vertexArray[vertexCount * 3 +1]=b;
-        	myObject->vertexArray[vertexCount * 3 +2]=c;
-            
-            vertexCount++;
-        }
-        else if (title == "f")
-        {
-            string a, b, c;
-            f2 >> title >> a >> b >> c;
-            float x, y, z;
-            // a = "1/1/1" 
+        else {
+            f >> title >> a >> b >> c;
+            std::cout << title << " " << a << " " << b << " " << c << endl;
+            /*
+            if (title == "vn")
+            {
+                cout << line << endl;
+                //vecPoint to determine x y z assignments x:0  y:1  z:2 ;
+                int startPointer = 0, length = 0, vecPoint = 0;
+                newNormal.setX(stof(a));
+                newNormal.setY(stof(b));
+                newNormal.setZ(stof(c));
 
-            a.replace(a.begin(), a.end(), '/', ' ');
-            b.replace(b.begin(), b.end(), '/', ' ');
-            c.replace(c.begin(), c.end(), '/', ' ');
-            (ifstream)a >> x >> y >> z;
-            myObject->indexArray[indexCount * 9] = x;
-            myObject->indexArray[indexCount * 9 +1] = y;
-            myObject->indexArray[indexCount * 9 +2] = z;
-            (ifstream)b >> x >> y >> z;
-            myObject->indexArray[indexCount * 9 + 3] = x;
-            myObject->indexArray[indexCount * 9 + 4] = y;
-            myObject->indexArray[indexCount * 9 + 5] = z;
-            (ifstream)c >> x >> y >> z;
-            myObject->indexArray[indexCount * 9 + 6] = x;
-            myObject->indexArray[indexCount * 9 + 7] = y;
-            myObject->indexArray[indexCount * 9 + 8] = z;
+                myObject->normalArray[normalCount] = newNormal;
+                cout << newNormal.getX() << " " << newNormal.getY() << " " << newNormal.getZ()<< " " << endl;
 
-            indexCount++;
-            
+
+
+                normalCount++;
+            }
+            /*
+            else if (title == "vt")
+            {
+                f2 >> title >> a >> b;
+                myObject->textureArray[uvCount].setX(a);
+                myObject->textureArray[uvCount].setY(b);
+
+
+                uvCount++;
+            }
+            else if (title == "v")
+            {
+                f2 >> title >> a >> b >> c;
+                cout << a;
+                myObject->vertexArray[vertexCount * 3].setX(a);
+                myObject->vertexArray[vertexCount * 3].setY(b);
+                myObject->vertexArray[vertexCount * 3].setZ(c);
+
+                vertexCount++;
+            }
+            /*
+            else if (title == "f")
+            {
+                string a, b, c;
+                f2 >> title >> a >> b >> c;
+                float x, y, z;
+                // a = "1/1/1"
+
+                a.replace(a.begin(), a.end(), '/', ' ');
+                b.replace(b.begin(), b.end(), '/', ' ');
+                c.replace(c.begin(), c.end(), '/', ' ');
+                (ifstream)a >> x >> y >> z;
+                cout << x << " " << y << " " << z << endl;
+                myObject->indexArray[indexCount * 9] = x;
+                myObject->indexArray[indexCount * 9 +1] = y;
+                myObject->indexArray[indexCount * 9 +2] = z;
+                (ifstream)b >> x >> y >> z;
+                myObject->indexArray[indexCount * 9 + 3] = x;
+                myObject->indexArray[indexCount * 9 + 4] = y;
+                myObject->indexArray[indexCount * 9 + 5] = z;
+                (ifstream)c >> x >> y >> z;
+                myObject->indexArray[indexCount * 9 + 6] = x;
+                myObject->indexArray[indexCount * 9 + 7] = y;
+                myObject->indexArray[indexCount * 9 + 8] = z;
+
+                indexCount++;
+
+            } */
         }
     }
-
-    cout << "Vertex positions: " << (myObject->vertexArray[1]) << endl
-         << "Normals: " << sizeof(myObject->normalArray) << endl
+    std::cout << "Vertex positions: " << sizeof(myObject->vertexArray) << endl
+         << "Normals: " << (myObject->normalArray[0].getX()) << endl
          << "uv count: " << sizeof(myObject->textureArray) << endl
          << "Indexes: " << sizeof(myObject->indexArray) << endl;
 
@@ -365,3 +447,38 @@ int main()
 
 }
 
+/**/
+
+// failed attempts
+
+// attempt to read file
+// problem:
+// File would be one line behind title component meaning all values were displaced
+// this meant that a vertex coordinate would be stored as a normal and a normal as a texture coord , etc 
+ /*
+            for (int i =0; i<=line.length();i++)
+            {
+
+                length++;
+
+                if(line[i] == ' ' || i == line.length())
+                {
+                    if(i != 0)
+                    {
+                        float CoordValue = stof(line.substr(startPointer, length));
+                        //determine which component of the vector to set
+                        switch (vecPoint)
+                        {
+                        case 0: newNormal.setX(CoordValue); vecPoint++; break;
+                        case 1: newNormal.setY(CoordValue); vecPoint++; break;
+                        case 2: newNormal.setZ(CoordValue); vecPoint = 0; break;
+                        default: cout << "what?";
+                        }
+                    }
+
+                    startPointer = i;
+                    length = 0;
+                }
+
+            }
+            */

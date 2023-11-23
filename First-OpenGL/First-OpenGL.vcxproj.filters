@@ -21,6 +21,9 @@
     <ClCompile Include="..\..\..\..\..\..\..\Glad\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="String append.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\..\..\Glad\include\glad\glad.h">
